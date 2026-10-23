@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Xem thông tin chi tiết, giá bán, tồn kho và đánh giá sách tại BOOKVERSE.">
+  <title>Chi tiết sách | BOOKVERSE</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <div data-site-header></div>
+  <main id="main-content">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Đường dẫn trang">
+          <a href="index.html">Trang chủ</a>
+          <span aria-hidden="true">/</span>
+          <a href="books.html">Sách</a>
+          <span aria-hidden="true">/</span>
+          <span>Chi tiết</span>
+        </nav>
+        <h1>Thông tin sách</h1>
+      </div>
+    </section>
+
+    <section class="section" aria-label="Chi tiết sản phẩm">
+      <div class="container" id="book-detail">
+        <div class="skeleton" style="height:450px;border-radius:24px" aria-label="Đang tải thông tin sách"></div>
+      </div>
+    </section>
+  </main>
+  <div data-site-footer></div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script defer src="assets/js/storage.js"></script>
+  <script defer src="assets/js/main.js"></script>
+  <script defer src="assets/js/book-detail.js"></script>
+</body>
+</html>

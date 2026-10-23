@@ -1,0 +1,30 @@
+@keyframes floatBook { 0%,100%{transform:perspective(1000px) rotateY(-22deg) rotateX(4deg) translateY(0)} 50%{transform:perspective(1000px) rotateY(-18deg) rotateX(2deg) translateY(-14px)} }
+@keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
+@keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.25)} 50%{box-shadow:0 0 0 12px rgba(245,158,11,0)} }
+.floating-book { animation:floatBook 5s ease-in-out infinite; }
+.btn-accent { animation:pulseGlow 3s ease-in-out infinite; }
+.ripple { position:absolute; border-radius:50%; pointer-events:none; background:rgba(255,255,255,.5); transform:scale(0); animation:ripple .55s linear; }
+@keyframes ripple { to{transform:scale(4);opacity:0} }
+.skeleton { background:linear-gradient(90deg,var(--border-color) 25%,var(--surface-color) 50%,var(--border-color) 75%); background-size:200% 100%; animation:shimmer 1.3s infinite; }
+@keyframes shimmer { to{background-position:-200% 0} }
+@keyframes cosmicNebula { 0% { transform:translate3d(-1.5%,-1%,0) scale(1); } 50% { transform:translate3d(1.5%,1.5%,0) scale(1.04); } 100% { transform:translate3d(2%,-1%,0) scale(1.02); } }
+@keyframes cosmicParticleFloat {
+  0% { transform:translate3d(0,8vh,0) scale(.55); opacity:0; }
+  12% { opacity:var(--particle-opacity); }
+  82% { opacity:var(--particle-opacity); }
+  100% { transform:translate3d(var(--particle-drift),-118vh,0) scale(1.2); opacity:0; }
+}
+@keyframes cosmicStarTwinkle {
+  0%,28% { transform:rotate(-12deg) scale(.35); opacity:.2; }
+  58% { transform:rotate(8deg) scale(1.2); opacity:1; }
+  76%,100% { transform:rotate(18deg) scale(.62); opacity:.45; }
+}
+@keyframes welcomePromoShine { 0%,55% { transform:translateX(-80%); } 85%,100% { transform:translateX(90%); } }
+@keyframes welcomeBookFloat { 0%,100% { transform:translate(-50%,-48%) perspective(900px) rotateY(-12deg) rotateX(1deg); } 50% { transform:translate(-50%,-53%) perspective(900px) rotateY(-5deg) rotateX(4deg); } }
+@keyframes welcomeGlow { from { transform:translate(-50%,-50%) scale(.9); opacity:.65; } to { transform:translate(-50%,-50%) scale(1.08); opacity:1; } }
+@keyframes welcomeStarBlink { from { transform:scale(.45) rotate(-12deg); opacity:.25; } to { transform:scale(1.22) rotate(12deg); opacity:1; } }
+@media (prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; }
+  .cosmic-particle { top:var(--particle-top); bottom:auto; opacity:.24; animation:none!important; }
+}
+
