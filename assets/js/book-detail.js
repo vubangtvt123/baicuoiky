@@ -2,7 +2,20 @@
   'use strict';
 
   const BV = window.BV;
-  if (!BV) return;
+  if (!BV) {
+    const host = document.querySelector('#book-detail');
+    if (host) {
+      host.innerHTML = `
+        <section class="empty-state detail-empty panel">
+          <i class="fa-solid fa-triangle-exclamation fa-3x" aria-hidden="true"></i>
+          <h2>Chưa tải được dữ liệu sách</h2>
+          <p>Trình duyệt chưa tải xong kho sách BOOKVERSE. Hãy tải lại trang để thử lại.</p>
+          <button class="btn btn-primary" type="button" data-reload-detail><i class="fa-solid fa-rotate-right"></i> Tải lại trang</button>
+        </section>`;
+      host.querySelector('[data-reload-detail]')?.addEventListener('click', () => window.location.reload());
+    }
+    return;
+  }
 
   const numberValue = (value, fallback = 0) => {
     const parsed = Number(value);
@@ -51,7 +64,7 @@
       <section class="empty-state detail-empty panel">
         <i class="fa-regular fa-compass fa-3x" aria-hidden="true"></i>
         <h2>Không tìm thấy cuốn sách này</h2>
-        <p>ID trên đường dẫn không tồn tại hoặc sách đã được gỡ khỏi cửa hàng.</p>
+        <p>ID trên đường dẫn không tồn tại trong kho sách của thiết bị này. Nếu sách được thêm từ Admin ở máy khác, dữ liệu đó sẽ không tự động đồng bộ vì website demo dùng localStorage.</p>
         <a class="btn btn-primary" href="books.html"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách sách</a>
       </section>`;
   }
