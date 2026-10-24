@@ -130,7 +130,13 @@
     }));
     document.addEventListener('bv:cart',updateBadges);document.addEventListener('bv:wishlist',updateBadges); updateBadges();
     const pending=sessionStorage.getItem('bv_message');if(pending){toast(pending,'error');sessionStorage.removeItem('bv_message');}
-    if(window.AOS)AOS.init({duration:650,once:true,offset:70,disable:matchMedia('(prefers-reduced-motion: reduce)').matches});
+    if(window.AOS){
+      document.documentElement.classList.add('aos-ready');
+      AOS.init({duration:650,once:true,offset:70,disable:matchMedia('(prefers-reduced-motion: reduce)').matches});
+      setTimeout(()=>AOS.refreshHard(),120);
+    }else{
+      document.documentElement.classList.add('aos-unavailable');
+    }
   }
   window.BVUI={toast,updateBadges,setTheme}; createCosmicBackground();header();footer();document.readyState==='loading'?document.addEventListener('DOMContentLoaded',initInteractions):initInteractions();
 })();
