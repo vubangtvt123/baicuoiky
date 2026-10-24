@@ -20,7 +20,7 @@
       document.createTextNode(titleText.slice(brandIndex+brandText.length))
     );
   }
-  function renderHome(){ const featured=document.querySelector('#featured-books'),newBooks=document.querySelector('#new-books'),best=document.querySelector('#best-books');const all=BV.getBooks();if(featured)featured.innerHTML=all.filter(b=>b.featured).slice(0,8).map(card).join('');if(newBooks)newBooks.innerHTML=all.filter(b=>b.isNew).slice(0,4).map(card).join('');if(best)best.innerHTML=[...all].sort((a,b)=>b.sold-a.sold).slice(0,4).map(card).join(''); }
+  function renderHome(){ const featured=document.querySelector('#featured-books'),newBooks=document.querySelector('#new-books'),best=document.querySelector('#best-books');const all=BV.getBooks(),featuredList=all.filter(b=>b.featured),newList=all.filter(b=>b.isNew);if(featured)featured.innerHTML=(featuredList.length?featuredList:all).slice(0,8).map(card).join('');if(newBooks)newBooks.innerHTML=(newList.length?newList:[...all].sort((a,b)=>(b.year||0)-(a.year||0))).slice(0,4).map(card).join('');if(best)best.innerHTML=[...all].sort((a,b)=>(b.sold||0)-(a.sold||0)).slice(0,4).map(card).join(''); }
   function initPromoCountdown(){
     const timer=document.querySelector('[data-countdown]'),endedMessage=document.querySelector('[data-countdown-ended]');
     if(!timer||!endedMessage)return;
@@ -120,7 +120,7 @@
     initListing();
     if(document.querySelector('#book-detail')){
       const script=document.createElement('script');
-      script.src='assets/js/book-detail.js';
+      script.src='assets/js/book-detail.js?v=20261024-3';
       document.body.append(script);
     }else initDetail();
   }
