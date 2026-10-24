@@ -1,7 +1,8 @@
 (function () {
   'use strict';
   const KEYS = { books:'bv_books', catalogVersion:'bv_catalog_version', categories:'bv_categories', users:'bv_users', session:'bv_session', cart:'bv_cart', wishlist:'bv_wishlist', orders:'bv_orders', promotions:'bv_promotions', settings:'bv_settings', subscribers:'bv_newsletter_subscribers', comments:'bv_book_comments' };
-  const CATALOG_VERSION = '2026.10.24-1';
+  const CATALOG_VERSION = '2026.10.24-2';
+  const memoryStorage = new Map();
   const categories = ['Văn học','Kinh tế & Kinh doanh','Công nghệ & Lập trình','Kỹ năng sống','Tâm lý học','Thiếu nhi','Lịch sử','Ngoại ngữ'];
   const books = [
     {id:'BV001',title:'Dòng Sông Ký Ức',author:'Nguyễn An Nhiên',category:'Văn học',price:189000,salePrice:139000,description:'Một hành trình trở về miền ký ức, nơi những lựa chọn cũ soi sáng con đường hiện tại.',image:'assets/images/books/book-01.png',rating:4.9,stock:28,featured:true,isNew:false,sold:872,pages:328,publisher:'NXB Hội Nhà Văn',year:2025},
@@ -30,21 +31,24 @@
     {id:'P002',code:'FREESHIP',type:'fixed',value:30000,minOrder:350000,expires:'2027-12-31',active:true}
   ];
   const defaults = { storeName:'BOOKVERSE',email:'hello@bookverse.vn',phone:'028 3822 5678',address:'12 Nguyễn Huệ, Quận 1, TP.HCM',shippingFee:30000,theme:'light' };
-  function read(key,fallback=[]){ try { const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; } catch(e){ console.warn('Dữ liệu lỗi:',key); return fallback; } }
-  function write(key,value){ localStorage.setItem(key,JSON.stringify(value)); return value; }
+  function getItem(key){ try { return localStorage.getItem(key); } catch(e){ return memoryStorage.has(key)?memoryStorage.get(key):null; } }
+  function setItem(key,value){ try { localStorage.setItem(key,value); } catch(e){ memoryStorage.set(key,String(value)); } }
+  function removeItem(key){ try { localStorage.removeItem(key); } catch(e){ memoryStorage.delete(key); } }
+  function read(key,fallback=[]){ try { const v=getItem(key); return v?JSON.parse(v):fallback; } catch(e){ console.warn('Dữ liệu lỗi:',key); return fallback; } }
+  function write(key,value){ setItem(key,JSON.stringify(value)); return value; }
   function seedDefaultBooks(){
-    const raw=localStorage.getItem(KEYS.books);
+    const raw=getItem(KEYS.books);
     const stored=read(KEYS.books,[]);
     const current=Array.isArray(stored)?stored:[];
-    const needsSeed=!raw||localStorage.getItem(KEYS.catalogVersion)!==CATALOG_VERSION;
+    const needsSeed=!raw||current.length===0||getItem(KEYS.catalogVersion)!==CATALOG_VERSION;
     if(!needsSeed)return;
 
     const existingIds=new Set(current.map(book=>book&&book.id).filter(Boolean));
     const merged=[...current,...books.filter(book=>!existingIds.has(book.id)).map(book=>({...book}))];
     write(KEYS.books,merged);
-    localStorage.setItem(KEYS.catalogVersion,CATALOG_VERSION);
+    setItem(KEYS.catalogVersion,CATALOG_VERSION);
   }
-  function init(){ seedDefaultBooks(); if(!localStorage.getItem(KEYS.categories))write(KEYS.categories,categories); if(!localStorage.getItem(KEYS.users))write(KEYS.users,users); if(!localStorage.getItem(KEYS.orders))write(KEYS.orders,orders); if(!localStorage.getItem(KEYS.promotions))write(KEYS.promotions,promotions); if(!localStorage.getItem(KEYS.settings))write(KEYS.settings,defaults); if(!localStorage.getItem(KEYS.cart))write(KEYS.cart,[]); if(!localStorage.getItem(KEYS.wishlist))write(KEYS.wishlist,[]); if(!localStorage.getItem(KEYS.subscribers))write(KEYS.subscribers,[]); if(!localStorage.getItem(KEYS.comments))write(KEYS.comments,[]); }
+  function init(){ seedDefaultBooks(); if(!getItem(KEYS.categories))write(KEYS.categories,categories); if(!getItem(KEYS.users))write(KEYS.users,users); if(!getItem(KEYS.orders))write(KEYS.orders,orders); if(!getItem(KEYS.promotions))write(KEYS.promotions,promotions); if(!getItem(KEYS.settings))write(KEYS.settings,defaults); if(!getItem(KEYS.cart))write(KEYS.cart,[]); if(!getItem(KEYS.wishlist))write(KEYS.wishlist,[]); if(!getItem(KEYS.subscribers))write(KEYS.subscribers,[]); if(!getItem(KEYS.comments))write(KEYS.comments,[]); }
   const getBooks=()=>read(KEYS.books,books); const getUsers=()=>read(KEYS.users,users); const getOrders=()=>read(KEYS.orders,orders); const getCart=()=>read(KEYS.cart,[]); const getWishlist=()=>read(KEYS.wishlist,[]); const getPromotions=()=>read(KEYS.promotions,promotions); const getCategories=()=>read(KEYS.categories,categories); const getSettings=()=>read(KEYS.settings,defaults); const getSession=()=>read(KEYS.session,null); const getSubscribers=()=>read(KEYS.subscribers,[]); const getComments=bookId=>{const list=read(KEYS.comments,[]);return bookId?list.filter(item=>item.bookId===bookId):list;};
   function money(v){ return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(Number(v)||0); }
   function escapeHTML(value=''){ return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c])); }
@@ -75,7 +79,7 @@
     const comments=getComments();comments.unshift(comment);write(KEYS.comments,comments);document.dispatchEvent(new CustomEvent('bv:comment',{detail:comment}));
     return{ok:true,message:'Bình luận của bạn đã được đăng.',comment};
   }
-  function reset(){ Object.values(KEYS).forEach(k=>localStorage.removeItem(k)); init(); }
+  function reset(){ Object.values(KEYS).forEach(removeItem); init(); }
   init();
   window.BV={KEYS,read,write,init,getBooks,getUsers,getOrders,getCart,getWishlist,getPromotions,getCategories,getSettings,getSession,getSubscribers,getComments,money,escapeHTML,addToCart,toggleWishlist,addSubscriber,addComment,reset};
 })();
