@@ -16,7 +16,7 @@
     layer.setAttribute('aria-hidden','true');
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
     const coarse=matchMedia('(pointer: coarse)').matches;
-    const count=reduced?14:(coarse?20:34);
+    const count=reduced?14:(coarse?24:42);
     const fragment=document.createDocumentFragment();
     for(let index=0;index<count;index+=1){
       const particle=document.createElement('span');
@@ -24,8 +24,8 @@
       particle.style.setProperty('--particle-left',`${(Math.random()*100).toFixed(2)}%`);
       particle.style.setProperty('--particle-top',`${(Math.random()*100).toFixed(2)}%`);
       particle.style.setProperty('--particle-size',`${(1.5+Math.random()*3.6).toFixed(2)}px`);
-      particle.style.setProperty('--particle-duration',`${(13+Math.random()*17).toFixed(2)}s`);
-      particle.style.setProperty('--particle-delay',`-${(Math.random()*28).toFixed(2)}s`);
+      particle.style.setProperty('--particle-duration',`${(9+Math.random()*10).toFixed(2)}s`);
+      particle.style.setProperty('--particle-delay',`-${(Math.random()*18).toFixed(2)}s`);
       particle.style.setProperty('--particle-drift',`${(-55+Math.random()*110).toFixed(1)}px`);
       particle.style.setProperty('--particle-opacity',`${(.28+Math.random()*.42).toFixed(2)}`);
       fragment.append(particle);
@@ -37,8 +37,8 @@
       star.style.setProperty('--particle-left',`${(Math.random()*100).toFixed(2)}%`);
       star.style.setProperty('--particle-top',`${(Math.random()*100).toFixed(2)}%`);
       star.style.setProperty('--particle-size',`${(5+Math.random()*6).toFixed(2)}px`);
-      star.style.setProperty('--particle-duration',`${(17+Math.random()*18).toFixed(2)}s`);
-      star.style.setProperty('--particle-delay',`-${(Math.random()*32).toFixed(2)}s`);
+      star.style.setProperty('--particle-duration',`${(12+Math.random()*12).toFixed(2)}s`);
+      star.style.setProperty('--particle-delay',`-${(Math.random()*23).toFixed(2)}s`);
       star.style.setProperty('--particle-drift',`${(-75+Math.random()*150).toFixed(1)}px`);
       star.style.setProperty('--particle-opacity',`${(.42+Math.random()*.4).toFixed(2)}`);
       star.style.setProperty('--star-twinkle',`${(.85+Math.random()*1.5).toFixed(2)}s`);
@@ -47,6 +47,12 @@
     }
     layer.append(fragment);
     document.body.prepend(layer);
+    requestAnimationFrame(()=>layer.classList.add('is-active'));
+    document.addEventListener('visibilitychange',()=>{
+      if(document.hidden||reduced)return;
+      layer.classList.remove('is-active');
+      requestAnimationFrame(()=>requestAnimationFrame(()=>layer.classList.add('is-active')));
+    });
   }
   function createWelcomePromotion(){
     const path=location.pathname.replace(/\\/g,'/');
