@@ -1,6 +1,7 @@
 (function(){
   'use strict';
   const BV=window.BV; if(!BV)return;
+  document.documentElement.dataset.theme=BV.getSettings().theme==='dark'?'dark':'light';
   const isAdmin=location.pathname.replace(/\\/g,'/').includes('/admin/');
   const root=isAdmin?'../':'';
   function header(){
@@ -107,9 +108,109 @@
   }
   function updateBadges(){ const cart=BV.getCart().reduce((s,i)=>s+i.quantity,0); document.querySelectorAll('[data-cart-count]').forEach(e=>e.textContent=cart); document.querySelectorAll('[data-wish-count]').forEach(e=>e.textContent=BV.getWishlist().length); }
   function toast(message,type='success'){ let stack=document.querySelector('.toast-stack'); if(!stack){stack=document.createElement('div');stack.className='toast-stack';stack.setAttribute('aria-live','polite');document.body.append(stack);} const el=document.createElement('div');el.className=`toast ${type}`;el.textContent=message;stack.append(el);setTimeout(()=>el.remove(),3200); }
-  function setTheme(theme){ document.documentElement.dataset.theme=theme; const settings=BV.getSettings(); settings.theme=theme; BV.write(BV.KEYS.settings,settings); const icon=document.querySelector('#theme-toggle i'); if(icon)icon.className=`fa-solid fa-${theme==='dark'?'sun':'moon'}`; }
+  function initSectionTitleAnimations(){
+    const selector='.section-head .eyebrow,.section-head h2,.page-hero .breadcrumbs,.page-hero h1,.page-hero p,.hero-copy .eyebrow,.hero-copy h1,.hero-copy p,.newsletter>.eyebrow,.newsletter h2,.section>.container>h2';
+    const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const revealObserver='IntersectionObserver' in window
+      ?new IntersectionObserver(entries=>entries.forEach(entry=>{
+        if(!entry.isIntersecting)return;
+        entry.target.classList.add('is-visible');
+        revealObserver.unobserve(entry.target);
+      }),{threshold:.15,rootMargin:'0px 0px -32px 0px'})
+      :null;
+    function registerTitles(root){
+      if(root.nodeType!==Node.ELEMENT_NODE&&root!==document)return;
+      const elements=[];
+      if(root!==document&&root.matches?.(selector))elements.push(root);
+      elements.push(...root.querySelectorAll(selector));
+      elements.forEach(element=>{
+        if(element.classList.contains('section-title-animate'))return;
+        if(element.matches('.page-hero h1')&&element.textContent.trim()==='Mỗi độc giả là một vũ trụ.')element.classList.add('about-tagline');
+        element.classList.add('section-title-animate');
+        if(element.matches('h2'))element.classList.add('section-heading-color-flow');
+        if(reducedMotion||!revealObserver)element.classList.add('is-visible');
+        else revealObserver.observe(element);
+      });
+    }
+    registerTitles(document);
+    const contentObserver=new MutationObserver(records=>records.forEach(record=>record.addedNodes.forEach(registerTitles)));
+    contentObserver.observe(document.body,{childList:true,subtree:true});
+  }
+  function initHeroBookTilt(){
+    const book=document.querySelector('.hero .floating-book');
+    const visual=book?.closest('.hero-visual');
+    if(!book||!visual||matchMedia('(pointer: coarse)').matches||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const tilt=document.createElement('div');
+    tilt.className='hero-book-tilt';
+    visual.insertBefore(tilt,book);
+    tilt.append(book);
+    let frame=0;
+    let pointerX=0,pointerY=0;
+    const updateTilt=()=>{
+      frame=0;
+      const bounds=tilt.getBoundingClientRect();
+      const x=(pointerX-bounds.left)/bounds.width-.5;
+      const y=(pointerY-bounds.top)/bounds.height-.5;
+      const rotateX=-y*12;
+      const rotateY=x*14;
+      tilt.style.transform=`rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      tilt.style.setProperty('--shadow-x',`${x*16}px`);
+      tilt.style.setProperty('--shadow-y',`${y*16}px`);
+      tilt.style.setProperty('--glow-x',`${x*24}px`);
+      tilt.style.setProperty('--glow-y',`${y*24}px`);
+    };
+    tilt.addEventListener('mousemove',event=>{
+      pointerX=event.clientX;
+      pointerY=event.clientY;
+      tilt.classList.add('is-tilting');
+      if(!frame)frame=window.requestAnimationFrame(updateTilt);
+    });
+    tilt.addEventListener('mouseleave',()=>{
+      if(frame)window.cancelAnimationFrame(frame);
+      frame=0;
+      tilt.classList.remove('is-tilting');
+      tilt.style.transform='';
+      tilt.style.removeProperty('--shadow-x');
+      tilt.style.removeProperty('--shadow-y');
+      tilt.style.removeProperty('--glow-x');
+      tilt.style.removeProperty('--glow-y');
+    });
+  }
+  function loadCustomerChat(){
+    if(isAdmin||document.querySelector('[data-bv-chat-root]'))return;
+    const script=document.createElement('script');
+    script.src=`${root}assets/js/chat.js`;
+    script.addEventListener('error',()=>console.error('Không tải được BOOKVERSE AI chat widget.'));
+    document.body.append(script);
+  }
+  let themeTransitionTimeout;
+  function setTheme(theme){
+    const normalized=theme==='dark'?'dark':'light';
+    const root=document.documentElement;
+    const changed=root.dataset.theme!==normalized;
+    if(changed&&!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      root.classList.add('theme-transitioning');
+      window.clearTimeout(themeTransitionTimeout);
+      themeTransitionTimeout=window.setTimeout(()=>root.classList.remove('theme-transitioning'),650);
+    }
+    root.dataset.theme=normalized;
+    const settings=BV.getSettings();
+    settings.theme=normalized;
+    BV.write(BV.KEYS.settings,settings);
+    const icon=document.querySelector('#theme-toggle i');
+    if(icon)icon.className=`fa-solid fa-${normalized==='dark'?'sun':'moon'}`;
+  }
   function initInteractions(){
     setTheme(BV.getSettings().theme||'light');
+    initHeroBookTilt();
+    initSectionTitleAnimations();
+    loadCustomerChat();
+    const siteHeader=document.querySelector('.site-header');
+    const updateHeaderScrollState=()=>{
+      siteHeader?.classList.toggle('is-scrolled',window.scrollY>8);
+    };
+    updateHeaderScrollState();
+    window.addEventListener('scroll',updateHeaderScrollState,{passive:true});
     const adminEntry=document.querySelector('#admin-link');
     if(adminEntry&&BV.getSession()?.role!=='admin')adminEntry.remove();
     createWelcomePromotion();
@@ -134,4 +235,3 @@
   }
   window.BVUI={toast,updateBadges,setTheme}; createCosmicBackground();header();footer();document.readyState==='loading'?document.addEventListener('DOMContentLoaded',initInteractions):initInteractions();
 })();
-
