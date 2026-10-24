@@ -1,5 +1,19 @@
 @keyframes floatBook { 0%,100%{transform:perspective(1000px) rotateY(-22deg) rotateX(4deg) translateY(0)} 50%{transform:perspective(1000px) rotateY(-18deg) rotateX(2deg) translateY(-14px)} }
 @keyframes slideIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:none} }
+@keyframes pageHeroTitleShimmer { to{background-position:200% center} }
+.section-title-animate { opacity:0; transform:translate3d(0,16px,0); will-change:opacity,transform; }
+.section-title-animate.is-visible { animation:sectionTitleFadeUp .7s cubic-bezier(.2,.75,.25,1) both; }
+h1.section-title-animate.is-visible,h2.section-title-animate.is-visible { animation:sectionTitleScaleUp .8s cubic-bezier(.2,.75,.25,1) both; }
+.section-title-animate.is-visible:is(.eyebrow,.breadcrumbs) { animation-delay:.08s; }
+.section-title-animate.is-visible:is(h1,h2) { animation-delay:.2s; }
+.section-title-animate.is-visible:is(p) { animation-delay:.36s; }
+.section-heading-color-flow { color:transparent; background-image:linear-gradient(110deg,var(--text-color) 0%,var(--heading-flow-purple) 38%,var(--heading-flow-accent) 58%,var(--text-color) 100%); background-size:220% 100%; background-position:0% center; background-clip:text; -webkit-background-clip:text; will-change:background-position; }
+h2.section-heading-color-flow.is-visible { animation:sectionTitleScaleUp .8s cubic-bezier(.2,.75,.25,1) .2s both,sectionHeadingGradientFlow 8s ease-in-out 1s infinite alternate; }
+@keyframes sectionTitleFadeUp { from{opacity:0;transform:translate3d(0,16px,0)} to{opacity:1;transform:translate3d(0,0,0)} }
+@keyframes sectionTitleScaleUp { from{opacity:0;transform:translate3d(0,18px,0) scale(.975)} to{opacity:1;transform:translate3d(0,0,0) scale(1)} }
+@keyframes sectionHeadingGradientFlow { from{background-position:0% center} to{background-position:100% center} }
+.page-title-highlight { color:transparent; background:linear-gradient(100deg,#c4b5fd 0%,#67e8f9 45%,#fbbf24 70%,#c4b5fd 100%); background-size:200% auto; background-clip:text; -webkit-background-clip:text; text-shadow:0 0 18px rgba(103,232,249,.22); animation:pageHeroTitleShimmer 6s linear .9s infinite; }
+@media (prefers-reduced-motion:reduce) { .section-title-animate,.section-title-animate.is-visible { opacity:1; transform:none; animation:none!important; will-change:auto; } .section-heading-color-flow { will-change:auto; } .page-title-highlight { animation:none; } }
 @keyframes pulseGlow { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.25)} 50%{box-shadow:0 0 0 12px rgba(245,158,11,0)} }
 .floating-book { animation:floatBook 5s ease-in-out infinite; }
 .btn-accent { animation:pulseGlow 3s ease-in-out infinite; }
@@ -28,4 +42,3 @@
   *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; }
   .cosmic-particle { top:var(--particle-top); bottom:auto; opacity:.24; animation:none!important; }
 }
-

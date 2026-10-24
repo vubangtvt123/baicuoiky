@@ -2,7 +2,7 @@
 
 > **Mở trang sách, mở thế giới.**
 
-BOOKVERSE là đồ án môn **Thiết kế Website**, mô phỏng một hệ thống bán sách trực tuyến hoàn chỉnh bằng **HTML5, CSS3 và JavaScript ES6+ thuần**. Dự án không sử dụng framework và không có backend; toàn bộ dữ liệu demo được quản lý bằng `localStorage` để có thể chạy ngay với Live Server.
+BOOKVERSE là đồ án môn **Thiết kế Website**, mô phỏng một hệ thống bán sách trực tuyến hoàn chỉnh bằng **HTML5, CSS3 và JavaScript ES6+ thuần**. Dự án không sử dụng framework; dữ liệu cửa hàng demo được quản lý bằng `localStorage`. Chat AI tùy chọn sử dụng serverless API để bảo vệ khóa Gemini, vì vậy cần chạy qua môi trường hỗ trợ endpoint thay vì chỉ dùng Live Server.
 
 README này đồng thời là tài liệu cài đặt, kiểm thử, thuyết trình và minh chứng quá trình sử dụng Prompt Engineering để điều khiển AI giải quyết các yêu cầu có logic phức tạp.
 
@@ -135,6 +135,7 @@ baicuoiky/
 │   ├── js/
 │   │   ├── storage.js
 │   │   ├── main.js
+│   │   ├── chat.js
 │   │   ├── books.js
 │   │   ├── book-detail.js
 │   │   ├── cart.js
@@ -147,6 +148,8 @@ baicuoiky/
 │   │   ├── categories/
 │   │   └── logo/
 │   └── icons/
+├── api/
+│   └── chat.js
 └── admin/
     ├── index.html
     ├── books.html
@@ -191,6 +194,19 @@ Sau đó mở `http://127.0.0.1:5500`.
 > Không nên mở trực tiếp bằng URL `file:///...` vì trình duyệt có thể áp dụng quy tắc unique origin và hạn chế một số thao tác lưu trữ hoặc tải tài nguyên.
 
 Không cần `npm install`, không cần build và không cần kết nối cơ sở dữ liệu.
+
+---
+
+## Trợ lý AI BOOKVERSE (tùy chọn)
+
+Widget chat được nạp trên các trang cửa hàng qua `assets/js/main.js`; giao diện và luồng tin nhắn nằm trong `assets/js/chat.js` và `assets/css/style.css`. API serverless `api/chat.js` gọi Gemini 2.5 Flash. Khóa API chỉ được đọc ở server từ biến môi trường `GEMINI_API_KEY` — **không đặt khóa trong HTML hoặc JavaScript phía trình duyệt**.
+
+Để chạy thử hoặc triển khai:
+
+1. Triển khai repo bằng Vercel (hoặc môi trường serverless tương thích Vercel Functions).
+2. Tạo Gemini API key trong Google AI Studio và cấu hình `GEMINI_API_KEY` trong Environment Variables của deployment. Không commit giá trị bí mật vào Git.
+3. Để chạy local cùng API, cài/liên kết Vercel CLI, tạo `.env.local` chứa `GEMINI_API_KEY=...`, rồi chạy `vercel dev`. Live Server chỉ phục vụ static files nên endpoint `/api/chat` sẽ không hoạt động.
+4. Chat API giới hạn nội dung đầu vào, lịch sử hội thoại và số yêu cầu cơ bản; hãy bật thêm quota/rate limit phía hosting cho môi trường production.
 
 ---
 
