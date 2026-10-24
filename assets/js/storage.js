@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const KEYS = { books:'bv_books', catalogVersion:'bv_catalog_version', categories:'bv_categories', users:'bv_users', session:'bv_session', cart:'bv_cart', wishlist:'bv_wishlist', orders:'bv_orders', promotions:'bv_promotions', settings:'bv_settings', subscribers:'bv_newsletter_subscribers', comments:'bv_book_comments' };
-  const CATALOG_VERSION = '2026.10.24-2';
+  const CATALOG_VERSION = '2026.10.24-3';
   const memoryStorage = new Map();
   const categories = ['Văn học','Kinh tế & Kinh doanh','Công nghệ & Lập trình','Kỹ năng sống','Tâm lý học','Thiếu nhi','Lịch sử','Ngoại ngữ'];
   const books = [
@@ -39,17 +39,20 @@
   function seedDefaultBooks(){
     const raw=getItem(KEYS.books);
     const stored=read(KEYS.books,[]);
-    const current=Array.isArray(stored)?stored:[];
+    const current=Array.isArray(stored)?stored.filter(book=>book&&typeof book==='object'):[];
     const needsSeed=!raw||current.length===0||getItem(KEYS.catalogVersion)!==CATALOG_VERSION;
     if(!needsSeed)return;
 
-    const existingIds=new Set(current.map(book=>book&&book.id).filter(Boolean));
-    const merged=[...current,...books.filter(book=>!existingIds.has(book.id)).map(book=>({...book}))];
+    const seedIds=new Set(books.map(book=>book.id));
+    const existingById=new Map(current.filter(book=>book.id).map(book=>[book.id,book]));
+    const normalizedSeeds=books.map(book=>({...book,...(existingById.get(book.id)||{})}));
+    const customBooks=current.filter(book=>book.id&&!seedIds.has(book.id));
+    const merged=[...normalizedSeeds,...customBooks];
     write(KEYS.books,merged);
     setItem(KEYS.catalogVersion,CATALOG_VERSION);
   }
   function init(){ seedDefaultBooks(); if(!getItem(KEYS.categories))write(KEYS.categories,categories); if(!getItem(KEYS.users))write(KEYS.users,users); if(!getItem(KEYS.orders))write(KEYS.orders,orders); if(!getItem(KEYS.promotions))write(KEYS.promotions,promotions); if(!getItem(KEYS.settings))write(KEYS.settings,defaults); if(!getItem(KEYS.cart))write(KEYS.cart,[]); if(!getItem(KEYS.wishlist))write(KEYS.wishlist,[]); if(!getItem(KEYS.subscribers))write(KEYS.subscribers,[]); if(!getItem(KEYS.comments))write(KEYS.comments,[]); }
-  const getBooks=()=>read(KEYS.books,books); const getUsers=()=>read(KEYS.users,users); const getOrders=()=>read(KEYS.orders,orders); const getCart=()=>read(KEYS.cart,[]); const getWishlist=()=>read(KEYS.wishlist,[]); const getPromotions=()=>read(KEYS.promotions,promotions); const getCategories=()=>read(KEYS.categories,categories); const getSettings=()=>read(KEYS.settings,defaults); const getSession=()=>read(KEYS.session,null); const getSubscribers=()=>read(KEYS.subscribers,[]); const getComments=bookId=>{const list=read(KEYS.comments,[]);return bookId?list.filter(item=>item.bookId===bookId):list;};
+  const getBooks=()=>{const list=read(KEYS.books,books);return Array.isArray(list)&&list.length?list:books.map(book=>({...book}));}; const getUsers=()=>read(KEYS.users,users); const getOrders=()=>read(KEYS.orders,orders); const getCart=()=>read(KEYS.cart,[]); const getWishlist=()=>read(KEYS.wishlist,[]); const getPromotions=()=>read(KEYS.promotions,promotions); const getCategories=()=>read(KEYS.categories,categories); const getSettings=()=>read(KEYS.settings,defaults); const getSession=()=>read(KEYS.session,null); const getSubscribers=()=>read(KEYS.subscribers,[]); const getComments=bookId=>{const list=read(KEYS.comments,[]);return bookId?list.filter(item=>item.bookId===bookId):list;};
   function money(v){ return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(Number(v)||0); }
   function escapeHTML(value=''){ return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c])); }
   function addToCart(bookId,qty=1){ const book=getBooks().find(b=>b.id===bookId); if(!book) return {ok:false,message:'Không tìm thấy sách.'}; const cart=getCart(); const item=cart.find(i=>i.bookId===bookId); const next=(item?.quantity||0)+Number(qty); if(next<1||next>book.stock)return {ok:false,message:`Chỉ còn ${book.stock} cuốn trong kho.`}; item?item.quantity=next:cart.push({bookId,quantity:Number(qty)}); write(KEYS.cart,cart); document.dispatchEvent(new CustomEvent('bv:cart')); return {ok:true,message:'Đã thêm vào giỏ hàng.'}; }
